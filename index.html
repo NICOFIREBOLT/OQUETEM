@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cruzador de Dados</title>
+    <title>Cruzador de Dados - Diferença</title>
     <style>
         /* CSS para deixar a ferramenta bonita */
         body {
@@ -14,7 +14,7 @@
         }
         h1 {
             text-align: center;
-            color: #005a9c;
+            color: #d9534f; /* Tom vermelho para "diferença" */
         }
         .container {
             display: flex;
@@ -29,7 +29,7 @@
         }
         h2 {
             margin-top: 0;
-            border-bottom: 2px solid #005a9c;
+            border-bottom: 2px solid #aaa;
             padding-bottom: 5px;
         }
         textarea {
@@ -41,13 +41,17 @@
             border-radius: 8px;
             font-size: 14px;
         }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
         button {
-            display: block;
-            width: 100%;
+            flex: 1; /* Faz os botões dividirem o espaço */
             padding: 15px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            background-color: #007bff;
+            background-color: #d9534f; /* Vermelho */
             color: white;
             border: none;
             border-radius: 8px;
@@ -55,7 +59,7 @@
             transition: background-color 0.2s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #c9302c;
         }
         #results {
             background-color: #e9ecef; /* Fundo cinza claro para resultados */
@@ -64,7 +68,7 @@
 </head>
 <body>
 
-    <h1>📊 Cruzador de Dados v1.0</h1>
+    <h1>📊 Cruzador de Dados (O que é DIFERENTE)</h1>
 
     <div class="container">
         <div class="panel">
@@ -77,49 +81,69 @@
         </div>
     </div>
 
-    <button id="compareBtn">Encontrar Itens EM COMUM (Interseção)</button>
+    <div class="button-group">
+        <button id="btnA_minus_B">O que tem na A (e NÃO na B)</button>
+        <button id="btnB_minus_A">O que tem na B (e NÃO na A)</button>
+    </div>
 
     <h2>Resultados</h2>
     <textarea id="results" readonly placeholder="Os resultados aparecerão aqui..."></textarea>
 
     <script>
-        // Adiciona um "ouvinte" para o clique no botão
-        document.getElementById('compareBtn').addEventListener('click', function() {
-            
-            // 1. PEGAR OS DADOS: Pega o texto bruto das duas caixas
+        // --- Função Padrão para Ler e Limpar as Listas ---
+        // Vamos criar uma função para não repetir código
+        function getCleanLists() {
             const textA = document.getElementById('listA').value;
             const textB = document.getElementById('listB').value;
 
-            // 2. LIMPAR OS DADOS:
             // .split('\n') -> Quebra o texto em uma lista (array) a cada nova linha
-            // .map(item => item.trim()) -> Remove espaços em branco antes e depois de cada item
+            // .map(item => item.trim().toLowerCase()) -> Remove espaços E converte para minúsculas
             // .filter(item => item.length > 0) -> Remove linhas vazias
             const listA = textA.split('\n')
-                             .map(item => item.trim())
+                             .map(item => item.trim().toLowerCase()) 
                              .filter(item => item.length > 0);
                              
             const listB = textB.split('\n')
-                             .map(item => item.trim())
+                             .map(item => item.trim().toLowerCase())
                              .filter(item => item.length > 0);
 
-            // 3. PROCESSAR OS DADOS:
             // Usamos 'Set' (Conjunto) para performance. 
             // 'Set' é ótimo para verificar rapidamente se um item "existe" em uma lista.
-            // Isso também já remove duplicatas automaticamente da sua lista.
             const setA = new Set(listA);
             const setB = new Set(listB);
 
-            // 4. ENCONTRAR A INTERSEÇÃO:
-            // Filtramos a Lista A e mantemos apenas os itens que o SetB (conjunto B) "tem" (has)
-            const intersection = [...setA].filter(item => setB.has(item));
+            // Retorna os dois conjuntos prontos para a comparação
+            return { setA, setB };
+        }
 
-            // 5. MOSTRAR O RESULTADO:
-            if (intersection.length > 0) {
+        // --- Função para Mostrar os Resultados ---
+        function showResults(resultArray) {
+            if (resultArray.length > 0) {
                 // .join('\n') -> Transforma a lista de volta em texto, com uma quebra de linha
-                document.getElementById('results').value = intersection.join('\n');
+                document.getElementById('results').value = resultArray.join('\n');
             } else {
-                document.getElementById('results').value = "Nenhum item em comum foi encontrado.";
+                document.getElementById('results').value = "Nenhum item encontrado para esta condição.";
             }
+        }
+
+        // --- Botão 1: O que tem na A (e NÃO na B) ---
+        document.getElementById('btnA_minus_B').addEventListener('click', function() {
+            const { setA, setB } = getCleanLists();
+            
+            // Filtra o conjunto A, mantendo apenas itens que NÃO ( ! ) existem no conjunto B
+            const difference = [...setA].filter(item => !setB.has(item));
+            
+            showResults(difference);
+        });
+
+        // --- Botão 2: O que tem na B (e NÃO na A) ---
+        document.getElementById('btnB_minus_A').addEventListener('click', function() {
+            const { setA, setB } = getCleanLists();
+
+            // Filtra o conjunto B, mantendo apenas itens que NÃO ( ! ) existem no conjunto A
+            const difference = [...setB].filter(item => !setA.has(item));
+            
+            showResults(difference);
         });
     </script>
 </body>

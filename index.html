@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cruzador de Dados - Diferença</title>
+    <title>Cruzador de Dados - v3.0</title>
     <style>
-        /* CSS para deixar a ferramenta bonita */
+        /* O CSS é o mesmo da v2.0, sem mudanças */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 20px;
@@ -35,7 +35,7 @@
         textarea {
             width: 100%;
             min-height: 400px;
-            box-sizing: border-box; /* Garante que o padding não quebre o layout */
+            box-sizing: border-box; 
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -47,7 +47,7 @@
             margin-bottom: 20px;
         }
         button {
-            flex: 1; /* Faz os botões dividirem o espaço */
+            flex: 1; 
             padding: 15px;
             font-size: 16px;
             font-weight: bold;
@@ -62,13 +62,13 @@
             background-color: #c9302c;
         }
         #results {
-            background-color: #e9ecef; /* Fundo cinza claro para resultados */
+            background-color: #e9ecef; 
         }
     </style>
 </head>
 <body>
 
-    <h1>📊 Cruzador de Dados (O que é DIFERENTE)</h1>
+    <h1>📊 Cruzador de Dados v3.0 (Ignora Acentos e Espaços)</h1>
 
     <div class="container">
         <div class="panel">
@@ -90,36 +90,42 @@
     <textarea id="results" readonly placeholder="Os resultados aparecerão aqui..."></textarea>
 
     <script>
+        /**
+         * NOVIDADE v3.0: Função de "Normalização" Avançada
+         * Limpa uma string para comparação.
+         */
+        function normalizeString(str) {
+            return str
+                .toLowerCase()                      // 1. Converte para minúsculas
+                .normalize("NFD")                   // 2. Decompõe acentos (ex: 'á' vira 'a' + '´')
+                .replace(/[\u0300-\u036f]/g, "")   // 3. Remove os caracteres de acento
+                .replace(/ +/g, ' ')                // 4. Substitui múltiplos espaços por um
+                .trim();                            // 5. Remove espaços no início e fim
+        }
+
         // --- Função Padrão para Ler e Limpar as Listas ---
-        // Vamos criar uma função para não repetir código
         function getCleanLists() {
             const textA = document.getElementById('listA').value;
             const textB = document.getElementById('listB').value;
 
-            // .split('\n') -> Quebra o texto em uma lista (array) a cada nova linha
-            // .map(item => item.trim().toLowerCase()) -> Remove espaços E converte para minúsculas
-            // .filter(item => item.length > 0) -> Remove linhas vazias
+            // ATUALIZAÇÃO: Agora usamos a função normalizeString()
             const listA = textA.split('\n')
-                             .map(item => item.trim().toLowerCase()) 
+                             .map(normalizeString) // <-- MUDANÇA AQUI
                              .filter(item => item.length > 0);
                              
             const listB = textB.split('\n')
-                             .map(item => item.trim().toLowerCase())
+                             .map(normalizeString) // <-- MUDANÇA AQUI
                              .filter(item => item.length > 0);
 
-            // Usamos 'Set' (Conjunto) para performance. 
-            // 'Set' é ótimo para verificar rapidamente se um item "existe" em uma lista.
             const setA = new Set(listA);
             const setB = new Set(listB);
 
-            // Retorna os dois conjuntos prontos para a comparação
             return { setA, setB };
         }
 
-        // --- Função para Mostrar os Resultados ---
+        // --- Função para Mostrar os Resultados (sem alteração) ---
         function showResults(resultArray) {
             if (resultArray.length > 0) {
-                // .join('\n') -> Transforma a lista de volta em texto, com uma quebra de linha
                 document.getElementById('results').value = resultArray.join('\n');
             } else {
                 document.getElementById('results').value = "Nenhum item encontrado para esta condição.";
